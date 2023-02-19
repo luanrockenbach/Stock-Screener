@@ -1,14 +1,36 @@
-import fundamentus
-import pprint
+import yfinance
+import pandas as pd
+import plotly.express as px
+from dash import Dash, html, dcc
 
 
-response = int(input("Você deseja: \n[1] - Ver a lista de empresas e tickets\n[2] - Ver a lista de empresas por setor\n"
-                     "[3] - Já possuo um ticket para avaliar"))
+def show_dashboard(filtered_stocks):
+    # criar um gráfico de dispersão com as ações filtradas
+
+    app = Dash(__name__)
+
+    fig = px.line(filtered_stocks, x='Date', y='Open')
+
+    app.layout = html.Div(children=[
+        html.H1(children='Hello Dash'),
+
+        html.Div(children='''
+            Dash: A web application framework for your data.
+        '''),
+
+        dcc.Graph(
+            id='example-graph',
+            figure=fig
+        )
+    ])
+
+    if __name__ == '__main__':
+        app.run_server(debug=True)
 
 
-stock = str(input("digite o papel que você deseja analisar: "))
+ticket = input(str("\n - Digite qual ação você gostaria de analisar: "))
+ticker = yfinance.Ticker(ticket+".SA")
 
-result = fundamentus.get_resultado()
-
-#fundamentus.print_table(result.columns)
-pprint.pprint(result['cotacao'])
+stock_data = pd.DataFrame(ticker.history(period="1mo", interval="1d"))
+stock_data.reset_index(inplace=True)
+show_dashboard(stock_data)
